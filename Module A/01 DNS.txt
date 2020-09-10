@@ -1,0 +1,64 @@
+---file.skill39.net---
+
+#apt install bind9 dnsutils
+
+
+#vim /etc/apparmor.d/local/usr.sbin.named
+ /etc/bind/** rw,
+
+#service apparmor resload
+
+
+#service bind9 restart
+
+
+#vim /etc/bind/named.conf
+ //include "/etc/bind/named.conf.default-zones";
+ include "/etc/bind/named.conf.skill";
+
+
+#vim /etc/bind/named.conf.options
+
+
+#vim /etc/bind/named.conf.skill
+ acl internals { 192.168.1.0/24; 192.168.2.0/25; };
+ view "internal" {
+	match-clients { internals; };
+	zone "skill39.net" {
+		type master;
+		file "/etc/bind/skill/db.skill";
+		allow-update { 192.168.1.1; };
+	};
+	zone "1.168.192.in-addr.arpa" {
+		type master;
+		file "/etc/bind/skill/db.office";
+		allow-update { 192.168.1.1; };
+	};
+	zone "2.168.192.in-addr.arpa" {
+		type master;
+		file "/etc/bind/skill/db.private";
+	};
+ };
+ view "external" {
+	match-clients { any; };
+	zone "skill39.net" {
+		type master;
+		file "/etc/bind/skill/db.external";
+	};
+ };
+
+
+#mkdir /etc/bind/skill
+
+
+#cp /etc/bind/db.local /etc/bind/skill/db.skill
+
+
+#cp /etc/bind/db.local /etc/bind/skill/db.external
+
+
+#cp /etc/bind/db.127 /etc/bind/skill/db.office
+
+
+#cp /etc/bind/db.127 /etc/bind/skill/db.private
+
